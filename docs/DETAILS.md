@@ -61,10 +61,12 @@ both of which are the only two functions with genuine nested conditionals —
 both tested, both commented, left as-is.
 
 Why `test/` exists at all: it's the only thing that actually verifies a hook
-works, and CI (`.github/workflows/hooks.yml`) re-runs it on every push/PR. This
-repo's whole premise is "the hook is the enforcement, not the skill
-description" — a hook nobody re-tests is not enforcement, it's a guess that
-happened to be right once.
+works. There's no CI running it — a GitHub Actions workflow was tried and
+removed; the run failed on a billing lock before any step executed, not on
+anything in the hooks themselves. Run `node test/run-hooks.js` by hand after
+touching any hook script. This repo's whole premise is "the hook is the
+enforcement, not the skill description" — a hook nobody re-tests is not
+enforcement, it's a guess that happened to be right once.
 
 ---
 
