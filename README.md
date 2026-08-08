@@ -9,13 +9,13 @@ You need [Claude Code](https://claude.com/claude-code) open. Then, in a
 terminal:
 
 ```bash
-git clone https://github.com/pudiish/pudish.git
+git clone https://github.com/ishwarsw/pudi-skills.git
 ```
 
 In Claude Code, run these one at a time:
 
 ```
-/plugin marketplace add ./pudish
+/plugin marketplace add ./pudi-skills
 /plugin install lean@pudi-skills
 /plugin install guardrails@pudi-skills
 /plugin install devops@pudi-skills
@@ -28,7 +28,7 @@ That's it. Two more, only if they apply to you:
 /plugin install prd@pudi-skills       # you write product requirement docs
 ```
 
-To update later: `git pull` inside the `pudish` folder, then run
+To update later: `git pull` inside the `pudi-skills` folder, then run
 `/plugin marketplace update pudi-skills` in Claude Code.
 
 ## Use
