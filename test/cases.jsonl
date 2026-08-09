@@ -1,0 +1,82 @@
+// One case per line. Fields: hook, expect (block|pass), path, content — or
+// old/new for an Edit. `why` is the human label the runner prints.
+// Adding a rule to a hook means adding a line here in the same commit.
+
+// ---- guardrails rule 7: names and structure ----
+{"hook":"guardrails","expect":"block","path":"t.py","content":"__all__ = [\"a\"]","why":"__all__ declaration"}
+{"hook":"guardrails","expect":"block","path":"t.py","content":"if __name__ == \"__main__\":\n    run()","why":"__main__ guard"}
+{"hook":"guardrails","expect":"block","path":"t.py","content":"def _helper():\n    return 1","why":"leading-underscore def"}
+{"hook":"guardrails","expect":"block","path":"t.js","content":"const _cache = {};","why":"leading-underscore const"}
+{"hook":"guardrails","expect":"pass","path":"t.py","content":"class Model:\n    def __init__(self):\n        self.name = \"x\"","why":"dunder __init__ is allowlisted"}
+{"hook":"guardrails","expect":"pass","path":"t.py","content":"import re\npattern = re.compile(r\"_private\")","why":"underscore inside a string literal"}
+{"hook":"guardrails","expect":"pass","path":"t.py","old":"__all__ = [\"a\"]","new":"ALLOWED = [\"a\"]","why":"edit that removes a pre-existing violation"}
+{"hook":"guardrails","expect":"pass","path":"notes.md","content":"Use `__all__ = []` sparingly.","why":"non-code file is not scanned"}
+
+// ---- guardrails rule 7: dependency pinning ----
+{"hook":"guardrails","expect":"block","path":"requirements.txt","content":"django>=4","why":"requirements range specifier"}
+{"hook":"guardrails","expect":"block","path":"requirements.txt","content":"certifi","why":"requirements bare package"}
+{"hook":"guardrails","expect":"block","path":"requirements.txt","content":"pkg @ git+https://example.com/pkg.git","why":"VCS ref with no pinned revision"}
+{"hook":"guardrails","expect":"pass","path":"requirements.txt","content":"requests==2.31.0","why":"exact pin"}
+{"hook":"guardrails","expect":"pass","path":"requirements.txt","content":"requests[socks]==2.31.0","why":"extras with an exact pin"}
+{"hook":"guardrails","expect":"pass","path":"requirements.txt","content":"tomli==2.0.1 ; python_version < \"3.11\"","why":"env marker is not a range"}
+{"hook":"guardrails","expect":"pass","path":"requirements.txt","content":"-r base.txt\n--index-url https://pypi.org/simple","why":"pip flags are not requirements"}
+{"hook":"guardrails","expect":"block","path":"package.json","content":"{\n  \"dependencies\": {\n    \"jest\": \"^29.0.0\"\n  }\n}","why":"package.json caret range"}
+{"hook":"guardrails","expect":"block","path":"package.json","content":"{\n  \"devDependencies\": {\n    \"vite\": \"*\"\n  }\n}","why":"package.json wildcard version"}
+{"hook":"guardrails","expect":"pass","path":"package.json","content":"{\n  \"dependencies\": {\n    \"react\": \"18.2.0\"\n  }\n}","why":"package.json exact pin"}
+{"hook":"guardrails","expect":"pass","path":"package.json","content":"{\n  \"name\": \"app\",\n  \"engines\": {\n    \"node\": \">=18\"\n  }\n}","why":"D3: engines is not a dependency block"}
+{"hook":"guardrails","expect":"pass","path":"package.json","content":"{\n  \"browserslist\": {\n    \"production\": [\"> 0.5%\"]\n  }\n}","why":"D3: browserslist is not a dependency block"}
+{"hook":"guardrails","expect":"pass","path":"package.json","content":"{\n  \"scripts\": {\n    \"dev\": \"vite --port 3000\"\n  }\n}","why":"D3: scripts is not a dependency block"}
+{"hook":"guardrails","expect":"block","path":"pyproject.toml","content":"[project]\ndependencies = [\"requests>=2\"]","why":"pyproject dependencies array range"}
+{"hook":"guardrails","expect":"block","path":"pyproject.toml","content":"[project.optional-dependencies]\ndev = [\"pytest>=7\"]","why":"D4: optional-dependencies table form"}
+{"hook":"guardrails","expect":"pass","path":"pyproject.toml","content":"[project.optional-dependencies]\ndev = [\"pytest==7.4.0\"]","why":"D4: optional-dependencies table, pinned"}
+{"hook":"guardrails","expect":"pass","path":"pyproject.toml","content":"[project]\nname = \"my-project\"\nclassifiers = [\"Programming Language :: Python\"]\ndependencies = [\"requests==2.31.0\"]","why":"project metadata is not a requirement"}
+{"hook":"guardrails","expect":"pass","path":"pyproject.toml","content":"[tool.ruff.lint]\nselect = [\"E\", \"F\"]","why":"tool config array is not a requirement"}
+
+// ---- guardrails rule 7: a lockfile beside the manifest makes a range reproducible ----
+// Paths are repo-relative; run the suite from the repo root. Only the lockfile
+// needs to exist on disk — the manifest content arrives on stdin.
+{"hook":"guardrails","expect":"pass","path":"test/fixtures/npm-locked/package.json","content":"{\n  \"dependencies\": {\n    \"react\": \"^18.2.0\"\n  }\n}","why":"L1: caret range beside package-lock.json"}
+{"hook":"guardrails","expect":"pass","path":"test/fixtures/uv-locked/pyproject.toml","content":"[project]\ndependencies = [\"requests>=2\"]","why":"L1: pyproject range beside uv.lock"}
+{"hook":"guardrails","expect":"block","path":"test/fixtures/npm-locked/requirements.txt","content":"django>=4","why":"L2: package-lock.json does not vouch for a requirements.txt"}
+{"hook":"guardrails","expect":"block","path":"test/fixtures/pyproject.toml","content":"[project]\ndependencies = [\"requests>=2\"]","why":"L2: no lockfile in the manifest's own directory"}
+
+// ---- scanner: generated reports make zero network requests ----
+{"hook":"scanner","expect":"block","path":"scanner-reports/dashboard.html","content":"<script src=\"https://cdn.example.com/x.js\"></script>","why":"off-host script in a reports dir"}
+{"hook":"scanner","expect":"block","path":"reports/index.html","content":"<script src=\"https://cdn.example.com/x.js\"></script>","why":"D1: reports dir at repo root"}
+{"hook":"scanner","expect":"block","path":"dashboard.html","content":"<link href=\"https://fonts.example.com/c.css\" rel=\"stylesheet\">","why":"D1: bare dashboard.html at repo root"}
+{"hook":"scanner","expect":"pass","path":"reports/dashboard.html","content":"<img src=\"data:image/png;base64,iVBOR\">","why":"inline data uri is self-contained"}
+{"hook":"scanner","expect":"pass","path":"src/app/index.html","content":"<script src=\"https://cdn.tailwindcss.com\"></script>","why":"ordinary web page is out of scope"}
+
+// ---- scanner: intact credential patterns ----
+{"hook":"scanner","expect":"block","path":"src/config.py","content":"KEY = \"AKIAQYRSTUVWXYZ12345\"","why":"intact AWS key id in source"}
+{"hook":"scanner","expect":"block","path":"src/deploy.sh","content":"-----BEGIN RSA PRIVATE KEY-----","why":"private-key header in source"}
+{"hook":"scanner","expect":"pass","path":"fixtures/secrets.txt","content":"AKIAQYRSTUVWXYZ12345","why":"fixture corpus is exempt"}
+{"hook":"scanner","expect":"pass","path":"test/cases.jsonl","content":"AKIAQYRSTUVWXYZ12345","why":"D2: a hook's own test data must be writable"}
+{"hook":"scanner","expect":"pass","path":"docs/security.md","content":"Example key id: AKIAIOSFODNN7EXAMPLE","why":"D2: AWS documented placeholder is not a credential"}
+
+// ---- devops: YAML that parses but means the wrong thing ----
+{"hook":"devops","expect":"block","path":".github/workflows/ci.yml","content":"jobs:\n  test:\n    strategy:\n      matrix:\n        python-version: [3.10, 3.11]","why":"version float in a flow sequence"}
+{"hook":"devops","expect":"block","path":".github/workflows/ci.yml","content":"      python-version: 3.10","why":"version float as a scalar"}
+{"hook":"devops","expect":"block","path":"compose.yml","content":"services:\n  web:\n    version: 3.9","why":"unquoted compose version float"}
+{"hook":"devops","expect":"block","path":"k8s/deploy.yaml","content":"spec:\n  python-version:\n    - 3.10","why":"version float as a block list item"}
+{"hook":"devops","expect":"block","path":"k8s/deploy.yaml","content":"    spec:\n\t  containers: []","why":"tab used for indentation"}
+{"hook":"devops","expect":"block","path":"k8s/deploy.yaml","content":"    containers:\n      - image: nginx:latest","why":"mutable :latest image tag"}
+{"hook":"devops","expect":"block","path":"k8s/deploy.yaml","content":"    containers:\n      - image: nginx","why":"image with no tag at all"}
+{"hook":"devops","expect":"pass","path":".github/workflows/ci.yml","content":"      python-version: \"3.10\"","why":"quoted version is correct"}
+{"hook":"devops","expect":"pass","path":".github/workflows/ci.yml","content":"        python-version: [\"3.10\", \"3.11\"]","why":"quoted flow sequence"}
+{"hook":"devops","expect":"pass","path":"k8s/deploy.yaml","content":"apiVersion: apps/v1\nkind: Deployment","why":"apiVersion is not a float"}
+{"hook":"devops","expect":"pass","path":"k8s/deploy.yaml","content":"    containers:\n      - image: nginx:1.27.3","why":"pinned image tag"}
+{"hook":"devops","expect":"pass","path":"helm/values.yaml","content":"image: \"{{ .Values.registry }}/app:{{ .Chart.AppVersion }}\"","why":"templated image reference is not evaluated here"}
+{"hook":"devops","expect":"pass","path":"k8s/deploy.yaml","content":"    containers:\n      - image: registry.io/team/app@sha256:abc123","why":"digest-pinned image"}
+{"hook":"devops","expect":"pass","path":"app/config.py","content":"version = 3.10","why":"not a YAML file"}
+{"hook":"devops","expect":"pass","path":"ci.yml","content":"countries:\n  - \"NO\"\n  - \"SE\"","why":"quoted country codes are safe"}
+{"hook":"devops","expect":"pass","path":".github/workflows/ci.yml","content":"        python-version: [\"3.10\", \"3.11\", \"pypy-3.11\"]","why":"quoted pypy-3.11 must not match as a bare float"}
+{"hook":"devops","expect":"pass","path":".github/workflows/ci.yml","content":"        - { python-version: \"pypy-3.11\", os: \"windows-latest\" }","why":"inline map with quoted version"}
+{"hook":"guardrails","expect":"pass","env":{"PUDI_GUARDRAILS":"audit"},"stderrHas":"Guardrails audit","path":"app/svc.py","content":"def _helper():\n    return 1\n","why":"audit mode reports a preference violation without blocking"}
+{"hook":"guardrails","expect":"pass","env":{"PUDI_GUARDRAILS":"audit"},"stderrHas":"[reproducibility]","path":"requirements.txt","content":"requests>=2.0\n","why":"audit mode reports an unpinned dependency without blocking"}
+{"hook":"guardrails","expect":"pass","env":{"PUDI_GUARDRAILS":"off"},"path":"requirements.txt","content":"requests>=2.0\n","why":"off disables the hook entirely"}
+{"hook":"guardrails","expect":"block","env":{"PUDI_GUARDRAILS":"audti"},"path":"requirements.txt","content":"requests>=2.0\n","why":"an unrecognized mode falls back to enforce rather than silently passing"}
+{"hook":"guardrails","expect":"pass","env":{"PUDI_GUARDRAILS_PREFERENCE":"off"},"path":"app/svc.py","content":"def _helper():\n    return 1\n","why":"preference tier opted out lets a leading-underscore name through"}
+{"hook":"guardrails","expect":"pass","env":{"PUDI_GUARDRAILS_PREFERENCE":"off"},"path":"app/cli.py","content":"if __name__ == \"__main__\":\n    main()\n","why":"preference tier opted out lets a __main__ guard through"}
+{"hook":"guardrails","expect":"block","env":{"PUDI_GUARDRAILS_PREFERENCE":"off"},"path":"requirements.txt","content":"requests>=2.0\n","why":"opting out of preference must not disable reproducibility"}
+{"hook":"guardrails","expect":"block","stderrHas":"[preference]","path":"app/svc.py","content":"def _helper():\n    return 1\n","why":"enforce still blocks by default and labels the tier"}

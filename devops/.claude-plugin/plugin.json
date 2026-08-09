@@ -1,0 +1,10 @@
+{
+  "name": "devops",
+  "version": "0.1.0",
+  "description": "Write and debug infrastructure YAML — Kubernetes, GitHub Actions, docker-compose, Terraform — plus runtime triage playbooks. Ships a PreToolUse hook that blocks YAML which parses fine and means the wrong thing: unquoted version floats, tab indentation, and mutable image tags.",
+  "author": {
+    "name": "Ishwar Swarnapudi"
+  },
+  "keywords": ["devops", "yaml", "kubernetes", "ci", "docker", "debugging", "hooks"],
+  "license": "MIT"
+}

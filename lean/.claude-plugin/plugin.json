@@ -1,0 +1,10 @@
+{
+  "name": "lean",
+  "version": "0.2.0",
+  "description": "Build-less discipline: the YAGNI ladder, an over-engineering reviewer with a shortcut-debt ledger, and a codebase-convention reader. Ships a PostToolUse hook that warns when an edit makes a Python file measurably more complex; that hook needs python3 on PATH and reports once if it is absent.",
+  "author": {
+    "name": "Ishwar Swarnapudi"
+  },
+  "keywords": ["yagni", "simplicity", "code-review", "complexity", "hooks"],
+  "license": "MIT"
+}

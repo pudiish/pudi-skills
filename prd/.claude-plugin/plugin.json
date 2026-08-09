@@ -1,0 +1,10 @@
+{
+  "name": "prd",
+  "version": "0.1.0",
+  "description": "Seven-section, evidence-first PRD structure — TL;DR, problem, prioritized user stories, metrics that carry a number and a timeframe, Must/Should/Nice requirements, non-goals, open questions — with a three-persona review loop (engineer, product director, UX researcher). Follows the repo's own PRD template when it has one, and marks missing evidence rather than inventing it. Split out from lean because it fires on PRD requests only, not on every coding task.",
+  "author": {
+    "name": "Ishwar Swarnapudi"
+  },
+  "keywords": ["prd", "product", "requirements", "acceptance-criteria"],
+  "license": "MIT"
+}

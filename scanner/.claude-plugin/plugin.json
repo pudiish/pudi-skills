@@ -1,0 +1,10 @@
+{
+  "name": "scanner",
+  "version": "0.2.0",
+  "description": "Code-quality scanner toolchain: add one analyzer behind a design gate, render self-contained report dashboards, rank risk hotspots from churn and complexity, and remediate high-confidence findings with a before/after re-scan. Ships a PreToolUse hook that blocks network-dependent report HTML and intact credential patterns. Only useful in a repo that has a scanner.",
+  "author": {
+    "name": "Ishwar Swarnapudi"
+  },
+  "keywords": ["scanner", "quality", "static-analysis", "hotspots", "reports", "remediation", "hooks"],
+  "license": "MIT"
+}
